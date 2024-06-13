@@ -1,8 +1,8 @@
 # Spectre Miner
 
-[![Build status](https://github.com/spectre-project/spectre-miner/workflows/ci.yaml/badge.svg)](https://github.com/spectre-project/spectre-miner/actions/workflows/ci.yaml)
-[![GitHub release](https://img.shields.io/github/v/release/spectre-project/spectre-minerd.svg)](https://github.com/spectre-project/spectre-miner/releases)
-[![GitHub license](https://img.shields.io/crates/l/spectre-miner.svg)](https://github.com/spectre-project/spectre-miner/blob/main/LICENSE-MIT)
+[![Build status](https://github.com/spectre-project/spectre-miner/actions/workflows/ci.yaml/badge.svg)](https://github.com/spectre-project/spectre-miner/actions/workflows/ci.yaml)
+[![GitHub release](https://img.shields.io/github/v/release/spectre-project/spectre-miner.svg)](https://github.com/spectre-project/spectre-miner/releases)
+[![GitHub license](https://img.shields.io/github/license/spectre-project/spectre-miner.svg)](https://github.com/spectre-project/spectre-miner/blob/main/LICENSE-APACHE)
 [![GitHub downloads](https://img.shields.io/github/downloads/spectre-project/spectre-miner/total.svg)](https://github.com/spectre-project/spectre-miner/releases)
 
 A Rust binary for mining Spectre with the [SpectreX](https://github.com/spectre-project/rusty-spectrex)
