@@ -93,9 +93,9 @@ following flags:
 ./spectre-miner --mining-address=<spectre:XXXXX> --devfund=spectre:qrxf48dgrdkjxllxczek3uweuldtan9nanzjsavk0ak9ynwn0zsayjjh7upez
 ```
 
-Without specifying `--devfund-precent` it will default to 1%. If you
+Without specifying `--devfund-percent` it will default to 1%. If you
 want to change the percentage, you can pass the option
-`--devfund-precent=XX.YY` to mine only XX.YY% of the blocks into the
+`--devfund-percent=XX.YY` to mine only XX.YY% of the blocks into the
 devfund.
 
 ## License
