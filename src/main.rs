@@ -13,7 +13,8 @@ use std::{
     time::Duration,
 };
 
-use sys_info;
+// Add sysinfo crate for system information
+use sysinfo::{System, SystemExt};
 
 use crate::{
     cli::Opt, client::SpectredHandler, miner::MinerManager, proto::NotifyNewBlockTemplateRequestMessage,
@@ -65,25 +66,19 @@ async fn main() -> Result<(), Error> {
     let mut opt: Opt = Opt::parse();
     opt.process()?;
 
-    // Display CPU information
-    match sys_info::cpu_info() {
-        Ok(cpu_info) => {
-            println!("CPU Information: {:?}", cpu_info);
-        }
-        Err(e) => {
-            println!("Failed to get CPU information: {}", e);
-        }
-    }
+    // Create a System object to get system information
+    let mut sys = System::new_all();
+    sys.refresh_all();
 
-    // Display number of cores
-    match sys_info::cpu_num() {
-        Ok(num_cores) => {
-            println!("Number of CPU cores: {}", num_cores);
-        }
-        Err(e) => {
-            println!("Failed to get number of CPU cores: {}", e);
-        }
-    }
+    // Display system information
+    println!("=> System Information:");
+    println!("System name:             {:?}", sys.name());
+    println!("System kernel version:   {:?}", sys.kernel_version());
+    println!("System OS version:       {:?}", sys.os_version());
+    println!("System host name:        {:?}", sys.host_name());
+
+    // Display number of CPUs
+    println!("Number of CPUs: {}", sys.cpus().len());
 
     let mut builder = env_logger::builder();
     builder.filter_level(opt.log_level()).parse_default_env();

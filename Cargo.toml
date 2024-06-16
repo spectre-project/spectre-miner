@@ -37,7 +37,7 @@ parking = { package = "parking_lot", version = "0.12", optional = true }
 shuttle = { version = "0.6", optional = true }
 chrono = "0.4"
 spectrex = ">=0.3.17"
-sys-info = "0.9"
+sysinfo = "0.30.12"
 
 [features]
 default = ["keccak?/asm"]
