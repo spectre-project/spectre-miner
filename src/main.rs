@@ -13,6 +13,8 @@ use std::{
     time::Duration,
 };
 
+use sys_info;
+
 use crate::{
     cli::Opt, client::SpectredHandler, miner::MinerManager, proto::NotifyNewBlockTemplateRequestMessage,
     target::Uint256,
@@ -62,6 +64,26 @@ impl Drop for ShutdownOnDrop {
 async fn main() -> Result<(), Error> {
     let mut opt: Opt = Opt::parse();
     opt.process()?;
+
+    // Display CPU information
+    match sys_info::cpu_info() {
+        Ok(cpu_info) => {
+            println!("CPU Information: {:?}", cpu_info);
+        }
+        Err(e) => {
+            println!("Failed to get CPU information: {}", e);
+        }
+    }
+
+    // Display number of cores
+    match sys_info::cpu_num() {
+        Ok(num_cores) => {
+            println!("Number of CPU cores: {}", num_cores);
+        }
+        Err(e) => {
+            println!("Failed to get number of CPU cores: {}", e);
+        }
+    }
 
     let mut builder = env_logger::builder();
     builder.filter_level(opt.log_level()).parse_default_env();
