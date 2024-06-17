@@ -13,8 +13,12 @@ use std::{
     time::Duration,
 };
 
+<<<<<<< HEAD
 // Add sysinfo crate for system information
 use sysinfo::{System, SystemExt};
+=======
+use sysinfo::System;
+>>>>>>> parent of 66a0a52 (SystemExt not required since ver 0.30)
 
 use crate::{
     cli::Opt, client::SpectredHandler, miner::MinerManager, proto::NotifyNewBlockTemplateRequestMessage,
@@ -77,6 +81,14 @@ async fn main() -> Result<(), Error> {
     println!("System OS version:       {:?}", sys.os_version());
     println!("System host name:        {:?}", sys.host_name());
 
+<<<<<<< HEAD
+=======
+    // Display CPU brand information
+    for cpu in sys.cpus() {
+        println!("CPU brand: {}", cpu.brand());
+    }
+
+>>>>>>> parent of 66a0a52 (SystemExt not required since ver 0.30)
     // Display number of CPUs
     println!("Number of CPUs: {}", sys.cpus().len());
 
