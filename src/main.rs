@@ -13,7 +13,8 @@ use std::{
     time::Duration,
 };
 
-use sysinfo::System;
+// Add sysinfo crate for system information
+use sysinfo::{System, SystemExt};
 
 use crate::{
     cli::Opt, client::SpectredHandler, miner::MinerManager, proto::NotifyNewBlockTemplateRequestMessage,
@@ -71,20 +72,13 @@ async fn main() -> Result<(), Error> {
 
     // Display system information
     println!("=> System Information:");
-    println!("System name:             {:?}", System::name());
-    println!("System kernel version:   {:?}", System::kernel_version());
-    println!("System OS version:       {:?}", System::os_version());
-    println!("System host name:        {:?}", System::host_name());
-
-    // Display CPU brand information
-    for cpu in sys.cpus() {
-        println!("CPU brand: {}", cpu.brand());
-    }
+    println!("System name:             {:?}", sys.name());
+    println!("System kernel version:   {:?}", sys.kernel_version());
+    println!("System OS version:       {:?}", sys.os_version());
+    println!("System host name:        {:?}", sys.host_name());
 
     // Display number of CPUs
     println!("Number of CPUs: {}", sys.cpus().len());
-    let total_memory_gb = sys.total_memory() as f64 / 1_073_741_824.0;
-    println!("Total RAM: {:.2} GB", total_memory_gb);
 
     let mut builder = env_logger::builder();
     builder.filter_level(opt.log_level()).parse_default_env();
