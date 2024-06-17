@@ -72,29 +72,29 @@ async fn main() -> Result<(), Error> {
 
     // Display system information
     println!("=> System Information:");
-    println!("System name:             {:?}", System::name());
-    println!("System kernel version:   {:?}", System::kernel_version());
-    println!("System OS version:       {:?}", System::os_version());
-    println!("System host name:        {:?}", System::host_name());
+    println!("System name:             {}", System::name().unwrap_or("Unknown".to_string()));
+    println!("System kernel version:   {}", System::kernel_version().unwrap_or("Unknown".to_string()));
+    println!("System OS version:       {}", System::os_version().unwrap_or("Unknown".to_string()));
+    println!("System host name:        {}", System::host_name().unwrap_or("Unknown".to_string()));
 
     // Display CPU brand and frequency information only if there is a change
     let mut last_cpu_brand = String::new();
     let mut last_cpu_frequency = 0;
     for cpu in sys.cpus() {
         if cpu.brand() != last_cpu_brand {
-            println!("CPU brand: {}", cpu.brand());
+            println!("CPU brand:               {}", cpu.brand());
             last_cpu_brand = cpu.brand().to_string();
         }
         if cpu.frequency() != last_cpu_frequency {
-            println!("CPU Frequency: {}", cpu.frequency());
+            println!("CPU Frequency:           {} MHz", cpu.frequency());
             last_cpu_frequency = cpu.frequency();
         }
     }
 
     // Display number of CPUs
-    println!("Number of CPUs: {}", sys.cpus().len());
+    println!("Number of CPUs:          {}", sys.cpus().len());
     let total_memory_gb = sys.total_memory() as f64 / 1_073_741_824.0;
-    println!("Total RAM: {:.2} GB", total_memory_gb);
+    println!("Total RAM:               {:.2} GB", total_memory_gb);
 
     let mut builder = env_logger::builder();
     builder.filter_level(opt.log_level()).parse_default_env();
