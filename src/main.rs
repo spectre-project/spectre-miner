@@ -13,7 +13,7 @@ use std::{
     time::Duration,
 };
 
-use sysinfo::System;
+use sysinfo::{System};
 
 use crate::{
     cli::Opt, client::SpectredHandler, miner::MinerManager, proto::NotifyNewBlockTemplateRequestMessage,
@@ -80,7 +80,7 @@ async fn main() -> Result<(), Error> {
     for cpu in sys.cpus() {
         println!("CPU brand: {}", cpu.brand());
     }
-
+    
     // Display number of CPUs
     println!("Number of CPUs: {}", sys.cpus().len());
     let total_memory_gb = sys.total_memory() as f64 / 1_073_741_824.0;
