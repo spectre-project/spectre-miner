@@ -13,16 +13,8 @@ use std::{
     time::Duration,
 };
 
-<<<<<<< HEAD
 // Add sysinfo crate for system information
-<<<<<<< Updated upstream
-use sysinfo::{System, SystemExt};
-=======
 use sysinfo::System;
->>>>>>> parent of 66a0a52 (SystemExt not required since ver 0.30)
-=======
-use sysinfo::System;
->>>>>>> Stashed changes
 
 use crate::{
     cli::Opt, client::SpectredHandler, miner::MinerManager, proto::NotifyNewBlockTemplateRequestMessage,
