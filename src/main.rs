@@ -13,6 +13,9 @@ use std::{
     time::Duration,
 };
 
+// Add sysinfo crate for system information
+use sysinfo::System;
+
 use crate::{
     cli::Opt, client::SpectredHandler, miner::MinerManager, proto::NotifyNewBlockTemplateRequestMessage,
     target::Uint256,
@@ -62,6 +65,36 @@ impl Drop for ShutdownOnDrop {
 async fn main() -> Result<(), Error> {
     let mut opt: Opt = Opt::parse();
     opt.process()?;
+
+    // Create a System object to get system information
+    let mut sys = System::new_all();
+    sys.refresh_all();
+
+    // Display system information
+    println!("=> System Information:");
+    println!("System name:             {:?}", System::name());
+    println!("System kernel version:   {:?}", System::kernel_version());
+    println!("System OS version:       {:?}", System::os_version());
+    println!("System host name:        {:?}", System::host_name());
+
+    // Display CPU brand and frequency information only if there is a change
+    let mut last_cpu_brand = String::new();
+    let mut last_cpu_frequency = 0;
+    for cpu in sys.cpus() {
+        if cpu.brand() != last_cpu_brand {
+            println!("CPU brand: {}", cpu.brand());
+            last_cpu_brand = cpu.brand().to_string();
+        }
+        if cpu.frequency() != last_cpu_frequency {
+            println!("CPU Frequency: {}", cpu.frequency());
+            last_cpu_frequency = cpu.frequency();
+        }
+    }
+
+    // Display number of CPUs
+    println!("Number of CPUs: {}", sys.cpus().len());
+    let total_memory_gb = sys.total_memory() as f64 / 1_073_741_824.0;
+    println!("Total RAM: {:.2} GB", total_memory_gb);
 
     let mut builder = env_logger::builder();
     builder.filter_level(opt.log_level()).parse_default_env();
