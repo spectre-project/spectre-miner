@@ -13,6 +13,9 @@ use std::{
     time::Duration,
 };
 
+// Add sysinfo crate for system information
+use sysinfo::System;
+
 use crate::{
     cli::Opt, client::SpectredHandler, miner::MinerManager, proto::NotifyNewBlockTemplateRequestMessage,
     target::Uint256,
@@ -62,6 +65,28 @@ impl Drop for ShutdownOnDrop {
 async fn main() -> Result<(), Error> {
     let mut opt: Opt = Opt::parse();
     opt.process()?;
+
+    // Create a System object to get system information
+    let mut sys = System::new_all();
+    sys.refresh_all();
+
+    // Display system information
+    println!("=> System Information:");
+    println!("System name:             {:?}", sys.name());
+    println!("System kernel version:   {:?}", sys.kernel_version());
+    println!("System OS version:       {:?}", sys.os_version());
+    println!("System host name:        {:?}", sys.host_name());
+
+<<<<<<< HEAD
+=======
+    // Display CPU brand information
+    for cpu in sys.cpus() {
+        println!("CPU brand: {}", cpu.brand());
+    }
+
+>>>>>>> parent of 66a0a52 (SystemExt not required since ver 0.30)
+    // Display number of CPUs
+    println!("Number of CPUs: {}", sys.cpus().len());
 
     let mut builder = env_logger::builder();
     builder.filter_level(opt.log_level()).parse_default_env();
