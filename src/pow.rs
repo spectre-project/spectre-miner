@@ -17,6 +17,7 @@ mod xoshiro;
 
 #[derive(Clone)]
 pub struct State {
+    #[allow(dead_code)]
     pub id: usize,
     matrix: Matrix,
     pub nonce: u64,
