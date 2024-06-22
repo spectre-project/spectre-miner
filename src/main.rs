@@ -2,7 +2,7 @@
 
 use chrono::Local;
 use clap::Parser;
-use log::{info, warn};
+use log::{info, warn, error};
 use std::error::Error as StdError;
 use std::{
     io::Write,
@@ -12,6 +12,7 @@ use std::{
     },
     time::Duration,
 };
+use tokio::sync::mpsc;
 
 // Add sysinfo crate for system information
 use sysinfo::System;
@@ -110,29 +111,53 @@ async fn main() -> Result<(), Error> {
     let shutdown = ShutdownHandler(Arc::new(AtomicBool::new(false)));
     let _shutdown_when_dropped = shutdown.arm();
 
+    let (send_channel, _) = mpsc::channel(100);
+    let mut miner_manager = MinerManager::new(
+        send_channel.clone(),
+        opt.num_threads,
+        throttle,
+        shutdown.clone(),
+    );
+
     while !shutdown.is_shutdown() {
-        let mut client = SpectredHandler::connect(
+        match SpectredHandler::connect(
             opt.spectred_address.clone(),
             opt.mining_address.clone(),
             opt.mine_when_not_synced,
-        )
-        .await?;
-        if let Some(devfund_address) = &opt.devfund_address {
-            client.add_devfund(devfund_address.clone(), opt.devfund_percent);
-            info!(
-                "devfund enabled, mining {}.{}% of the time to devfund address: {} ",
-                opt.devfund_percent / 100,
-                opt.devfund_percent % 100,
-                devfund_address
-            );
-        }
-        client.client_send(NotifyNewBlockTemplateRequestMessage {}).await?;
-        client.client_get_block_template().await?;
+        ).await {
+            Ok(mut client) => {
+                if let Some(devfund_address) = &opt.devfund_address {
+                    client.add_devfund(devfund_address.clone(), opt.devfund_percent);
+                    info!(
+                        "devfund enabled, mining {}.{}% of the time to devfund address: {} ",
+                        opt.devfund_percent / 100,
+                        opt.devfund_percent % 100,
+                        devfund_address
+                    );
+                }
+                if let Err(e) = client.client_send(NotifyNewBlockTemplateRequestMessage {}).await {
+                    error!("Error sending block template request: {}", e);
+                }
+                if let Err(e) = client.client_get_block_template().await {
+                    error!("Error getting block template: {}", e);
+                }
 
-        let mut miner_manager =
-            MinerManager::new(client.send_channel.clone(), opt.num_threads, throttle, shutdown.clone());
-        client.listen(&mut miner_manager, shutdown.clone()).await?;
-        warn!("Disconnected from spectred, retrying");
+                miner_manager.resume();
+
+                if let Err(e) = client.listen(&mut miner_manager, shutdown.clone()).await {
+                    warn!("Connection error: {}. Reconnecting in 10 seconds...", e);
+                    miner_manager.pause();
+                } else {
+                    warn!("Disconnected from spectred. Reconnecting in 10 seconds...");
+                    miner_manager.pause();
+                }
+            }
+            Err(e) => {
+                warn!("Failed to connect to spectred: {}. Retrying in 10 seconds...", e);
+                miner_manager.pause();
+            }
+        }
+        tokio::time::sleep(Duration::from_secs(10)).await;
     }
     Ok(())
 }
