@@ -1,7 +1,7 @@
 name: Build and upload assets
 on:
   release:
-    types: [ published ]
+    types: [published]
 
 jobs:
   build:
@@ -9,14 +9,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-
-        # Build gnu-linux on ubuntu-18.04 and musl on ubuntu latest.
-        os: [ ubuntu-20.04, ubuntu-latest, windows-latest, macos-latest ]
+        os: [ubuntu-20.04, ubuntu-latest, windows-latest, macos-latest]
     name: Building, ${{ matrix.os }}
     steps:
 
       - name: Checkout sources
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install toolchain
         id: rust-toolchain
@@ -95,7 +93,7 @@ jobs:
           rm ./bin/${asset_name}
 
       - name: Upload release asset
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             bin/*
