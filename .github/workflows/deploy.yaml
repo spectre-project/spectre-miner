@@ -10,14 +10,13 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-20.04, ubuntu-latest, windows-latest, macos-latest]
-    name: Building, ${{ matrix.os }}
+    name: Building on ${{ matrix.os }}
     steps:
 
       - name: Checkout sources
         uses: actions/checkout@v4
 
       - name: Install toolchain
-        id: rust-toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
@@ -30,43 +29,43 @@ jobs:
       - name: Create bin directory
         run: mkdir bin
 
-      - name: Build on Linux GNU
-        if: matrix.os == 'ubuntu-20.04'
-
-        # We're using musl to make the binaries statically linked and portable.
+      - name: Build on Linux GNU and HiveOS
+        if: ${{ matrix.os == 'ubuntu-20.04' }}
         run: |
           cargo build --target=x86_64-unknown-linux-gnu --release
-          archive_zip="bin/spectre-miner-${{ github.event.release.tag_name }}-linux-gnu-amd64.zip"
-          archive_tar="bin/spectre-miner-${{ github.event.release.tag_name }}-linux-gnu-amd64.tar.gz"
-          asset_name="spectre-miner-${{ github.event.release.tag_name }}-linux-gnu-amd64"
+          gnu_archive="bin/spectre-miner-${{ github.event.release.tag_name }}-linux-gnu-amd64.zip"
+          gnu_asset_name="spectre-miner-${{ github.event.release.tag_name }}-linux-gnu-amd64"
+          hiveos_asset_name="spectre-miner-${{ github.event.release.tag_name }}-linux-gnu-amd64-hiveos"
+          hiveos_archive="bin/hiveos-${{ github.event.release.tag_name }}-linux-gnu-amd64-hiveos.tar.xf"
           strip ./target/x86_64-unknown-linux-gnu/release/spectre-miner
-          mv ./target/x86_64-unknown-linux-gnu/release/spectre-miner ./bin/${asset_name}
-          zip -r "${archive_zip}" ./bin/${asset_name}
-          tar -czvf "${archive_tar}" -C bin ${asset_name}
-          rm ./bin/${asset_name}
+          cp ./target/x86_64-unknown-linux-gnu/release/spectre-miner ./bin/${gnu_asset_name}
+          zip -r "${gnu_archive}" ./bin/${gnu_asset_name}
+          mkdir -p ./bin/hiveos
+          cp ./target/x86_64-unknown-linux-gnu/release/spectre-miner ./bin/hiveos/${hiveos_asset_name}
+          cp hive-os/h-config.sh ./bin/hiveos/
+          cp hive-os/h-manifest.conf ./bin/hiveos/
+          cp hive-os/h-run.sh ./bin/hiveos/
+          cp hive-os/h-stats.sh ./bin/hiveos/
+          tar -czvf ./bin/hiveos/${hiveos_asset_name}.tar.gz -C ./bin/hiveos .
+          rm ./bin/${gnu_asset_name}
+          rm ./bin/hiveos/${hiveos_asset_name}
 
       - name: Build on Linux musl
-        if: matrix.os == 'ubuntu-latest'
-
-        # We're using musl to make the binaries statically linked and portable.
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
           sudo apt-get install -y musl-tools
           rustup target add x86_64-unknown-linux-musl
           cargo build --target=x86_64-unknown-linux-musl --release
-          archive_zip="bin/spectre-miner-${{ github.event.release.tag_name }}-linux-musl-amd64.zip"
-          archive_tar="bin/spectre-miner-${{ github.event.release.tag_name }}-linux-musl-amd64.tar.gz"
+          archive="bin/spectre-miner-${{ github.event.release.tag_name }}-linux-musl-amd64.zip"
           asset_name="spectre-miner-${{ github.event.release.tag_name }}-linux-musl-amd64"
           strip ./target/x86_64-unknown-linux-musl/release/spectre-miner
           mv ./target/x86_64-unknown-linux-musl/release/spectre-miner ./bin/${asset_name}
-          zip -r "${archive_zip}" ./bin/${asset_name}
-          tar -czvf "${archive_tar}" -C bin ${asset_name}
+          zip -r "${archive}" ./bin/${asset_name}
           rm ./bin/${asset_name}
 
       - name: Build on Windows
-        if: matrix.os == 'windows-latest'
+        if: ${{ matrix.os == 'windows-latest' }}
         shell: bash
-
-        # We're using 'bin/' instead of './bin/' as otherwise 7z won't add the directory.
         run: |
           cargo build --target=x86_64-pc-windows-msvc --release
           archive="bin/spectre-miner-${{ github.event.release.tag_name }}-win64-amd64.zip"
@@ -76,7 +75,7 @@ jobs:
           rm ./bin/${asset_name}
 
       - name: Build on MacOS for x86_64
-        if: matrix.os == 'macos-latest'
+        if: ${{ matrix.os == 'macos-latest' }}
         run: |
           rustup target add x86_64-apple-darwin
           cargo build --target=x86_64-apple-darwin --release
@@ -87,7 +86,7 @@ jobs:
           rm ./bin/${asset_name}
 
       - name: Build on MacOS for M1/2
-        if: matrix.os == 'macos-latest'
+        if: ${{ matrix.os == 'macos-latest' }}
         run: |
           cargo build --target=aarch64-apple-darwin --release
           archive="bin/spectre-miner-${{ github.event.release.tag_name }}-osx-aarch64.zip"
@@ -101,3 +100,5 @@ jobs:
         with:
           files: |
             bin/*
+            bin/hiveos/*
+
