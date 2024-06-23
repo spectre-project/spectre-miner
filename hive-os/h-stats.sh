@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source /hive/miners/custom/h-manifest.conf
+source /hive/miners/custom/spectre-miner/h-manifest.conf
 
 log=$(cat /var/log/miner/custom/custom.log)
 

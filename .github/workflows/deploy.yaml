@@ -41,7 +41,7 @@ jobs:
           cp ./target/x86_64-unknown-linux-gnu/release/spectre-miner ./bin/${gnu_asset_name}
           zip -r "${gnu_archive}" ./bin/${gnu_asset_name}
           mkdir -p ./bin/hiveos/spectre-miner
-          cp ./target/x86_64-unknown-linux-gnu/release/spectre-miner ./bin/hiveos/spectre-miner/${hiveos_asset_name}
+          cp ./target/x86_64-unknown-linux-gnu/release/spectre-miner ./bin/hiveos/spectre-miner/spectre-miner
           cp hive-os/h-config.sh ./bin/hiveos/spectre-miner/
           cp hive-os/h-manifest.conf ./bin/hiveos/spectre-miner/
           cp hive-os/h-run.sh ./bin/hiveos/spectre-miner/
