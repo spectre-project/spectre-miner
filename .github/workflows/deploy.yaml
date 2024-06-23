@@ -33,22 +33,30 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-20.04' }}
         run: |
           cargo build --target=x86_64-unknown-linux-gnu --release
+
           gnu_archive="bin/spectre-miner-${{ github.event.release.tag_name }}-linux-gnu-amd64.zip"
           gnu_asset_name="spectre-miner-${{ github.event.release.tag_name }}-linux-gnu-amd64"
-          hiveos_asset_name="spectre-miner-${{ github.event.release.tag_name }}-linux-gnu-amd64-hiveos"
-          hiveos_archive="bin/hiveos-${{ github.event.release.tag_name }}-linux-gnu-amd64-hiveos.tar.xf"
+          hiveos_archive="bin/hiveos/spectre-miner-${{ github.event.release.tag_name }}-linux-gnu-amd64-hiveos.tar.gz"
+          hiveos_asset_name="spectre-miner"
+
           strip ./target/x86_64-unknown-linux-gnu/release/spectre-miner
+
           cp ./target/x86_64-unknown-linux-gnu/release/spectre-miner ./bin/${gnu_asset_name}
           zip -r "${gnu_archive}" ./bin/${gnu_asset_name}
-          mkdir -p ./bin/hiveos
-          cp ./target/x86_64-unknown-linux-gnu/release/spectre-miner ./bin/hiveos/${hiveos_asset_name}
-          cp hive-os/h-config.sh ./bin/hiveos/
-          cp hive-os/h-manifest.conf ./bin/hiveos/
-          cp hive-os/h-run.sh ./bin/hiveos/
-          cp hive-os/h-stats.sh ./bin/hiveos/
-          tar -czvf ./bin/hiveos/${hiveos_asset_name}.tar.gz -C ./bin/hiveos .
           rm ./bin/${gnu_asset_name}
-          rm ./bin/hiveos/${hiveos_asset_name}
+
+          mkdir -p ./bin/hiveos/${hiveos_asset_name}
+          cp ./target/x86_64-unknown-linux-gnu/release/spectre-miner ./bin/hiveos/${hiveos_asset_name}/spectre-miner
+          cp hive-os/h-config.sh ./bin/hiveos/${hiveos_asset_name}/
+          cp hive-os/h-manifest.conf ./bin/hiveos/${hiveos_asset_name}/
+          cp hive-os/h-run.sh ./bin/hiveos/${hiveos_asset_name}/
+          cp hive-os/h-stats.sh ./bin/hiveos/${hiveos_asset_name}/
+
+          tar -czvf ${hiveos_archive} -C ./bin/hiveos ${hiveos_asset_name}
+
+          rm ./bin/${gnu_asset_name}
+          rm ./bin/hiveos/*
+
 
       - name: Build on Linux musl
         if: ${{ matrix.os == 'ubuntu-latest' }}

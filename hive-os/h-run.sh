@@ -23,7 +23,7 @@ CUSTOM_USER_CONFIG=$(< $CUSTOM_CONFIG_FILENAME)
 echo "args: $CUSTOM_USER_CONFIG"
 
 OLD=""
-MINER=rusty-spectre
+MINER=spectre-miner
 
 
 
@@ -35,7 +35,7 @@ CLEAN=$(echo "$CUSTOM_USER_CONFIG" | sed -E 's/-arch [^ ]+ //')
 echo "args are now: $CLEAN"
 echo "We are using miner: $MINER"
 echo $(date +%s) > "/tmp/miner_start_time"
-echo $CUSTOM_VERSION > /tmp/.rusty-spectre-version
+echo $CUSTOM_VERSION > /tmp/.spectre-miner-version
 /hive/miners/custom/$MINER/$MINER $CLEAN  2>&1 | tee -a  ${CUSTOM_LOG_BASENAME}.log
 echo "Miner has exited"
 
