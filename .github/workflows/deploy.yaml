@@ -36,11 +36,13 @@ jobs:
         # We're using musl to make the binaries statically linked and portable.
         run: |
           cargo build --target=x86_64-unknown-linux-gnu --release
-          archive="bin/spectre-miner-${{ github.event.release.tag_name }}-linux-gnu-amd64.zip"
+          archive_zip="bin/spectre-miner-${{ github.event.release.tag_name }}-linux-gnu-amd64.zip"
+          archive_tar="bin/spectre-miner-${{ github.event.release.tag_name }}-linux-gnu-amd64.tar.gz"
           asset_name="spectre-miner-${{ github.event.release.tag_name }}-linux-gnu-amd64"
           strip ./target/x86_64-unknown-linux-gnu/release/spectre-miner
           mv ./target/x86_64-unknown-linux-gnu/release/spectre-miner ./bin/${asset_name}
-          zip -r "${archive}" ./bin/${asset_name}
+          zip -r "${archive_zip}" ./bin/${asset_name}
+          tar -czvf "${archive_tar}" -C bin ${asset_name}
           rm ./bin/${asset_name}
 
       - name: Build on Linux musl
@@ -51,11 +53,13 @@ jobs:
           sudo apt-get install -y musl-tools
           rustup target add x86_64-unknown-linux-musl
           cargo build --target=x86_64-unknown-linux-musl --release
-          archive="bin/spectre-miner-${{ github.event.release.tag_name }}-linux-musl-amd64.zip"
+          archive_zip="bin/spectre-miner-${{ github.event.release.tag_name }}-linux-musl-amd64.zip"
+          archive_tar="bin/spectre-miner-${{ github.event.release.tag_name }}-linux-musl-amd64.tar.gz"
           asset_name="spectre-miner-${{ github.event.release.tag_name }}-linux-musl-amd64"
           strip ./target/x86_64-unknown-linux-musl/release/spectre-miner
           mv ./target/x86_64-unknown-linux-musl/release/spectre-miner ./bin/${asset_name}
-          zip -r "${archive}" ./bin/${asset_name}
+          zip -r "${archive_zip}" ./bin/${asset_name}
+          tar -czvf "${archive_tar}" -C bin ${asset_name}
           rm ./bin/${asset_name}
 
       - name: Build on Windows
