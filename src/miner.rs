@@ -9,7 +9,7 @@ use rand::{thread_rng, RngCore};
 use std::{
     num::Wrapping,
     sync::{
-        atomic::{AtomicU64, AtomicUsize, Ordering},
+        atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering},
         Arc,
     },
     time::Duration,
@@ -31,6 +31,7 @@ pub struct MinerManager {
     is_synced: bool,
     hashes_tried: Arc<AtomicU64>,
     current_state_id: AtomicUsize,
+    paused: Arc<AtomicBool>,
 }
 
 impl Drop for MinerManager {
@@ -56,6 +57,7 @@ impl MinerManager {
     ) -> Self {
         let hashes_tried = Arc::new(AtomicU64::new(0));
         let watch = WatchSwap::empty();
+        let paused = Arc::new(AtomicBool::new(false));
         let handles = Self::launch_cpu_threads(
             send_channel.clone(),
             hashes_tried.clone(),
@@ -63,6 +65,7 @@ impl MinerManager {
             shutdown,
             n_cpus,
             throttle,
+            paused.clone(),
         )
         .collect();
 
@@ -74,6 +77,7 @@ impl MinerManager {
             is_synced: true,
             hashes_tried,
             current_state_id: AtomicUsize::new(0),
+            paused,
         }
     }
 
@@ -84,6 +88,7 @@ impl MinerManager {
         shutdown: ShutdownHandler,
         n_cpus: Option<u16>,
         throttle: Option<Duration>,
+        paused: Arc<AtomicBool>,
     ) -> impl Iterator<Item = MinerHandler> {
         let n_cpus = get_num_cpus(n_cpus);
         info!("Launching: {} cpu miners", n_cpus);
@@ -94,6 +99,7 @@ impl MinerManager {
                 hashes_tried.clone(),
                 throttle,
                 shutdown.clone(),
+                paused.clone(),
             )
         })
     }
@@ -117,12 +123,21 @@ impl MinerManager {
         Ok(())
     }
 
+    pub fn pause(&self) {
+        self.paused.store(true, Ordering::SeqCst);
+    }
+
+    pub fn resume(&self) {
+        self.paused.store(false, Ordering::SeqCst);
+    }
+
     pub fn launch_cpu_miner(
         send_channel: Sender<SpectredMessage>,
         mut block_channel: WatchSwap<pow::State>,
         hashes_tried: Arc<AtomicU64>,
         throttle: Option<Duration>,
         shutdown: ShutdownHandler,
+        paused: Arc<AtomicBool>,
     ) -> MinerHandler {
         // We mark it cold as the function is not called often, and it's not in the hot path
         #[cold]
@@ -137,6 +152,11 @@ impl MinerManager {
         std::thread::spawn(move || {
             let mut state = None;
             loop {
+                if paused.load(Ordering::SeqCst) {
+                    std::thread::sleep(Duration::from_millis(100));
+                    continue;
+                }
+
                 if state.is_none() {
                     state = block_channel.wait_for_change().as_deref().cloned();
                 }
