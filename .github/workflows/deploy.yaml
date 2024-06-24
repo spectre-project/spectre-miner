@@ -106,3 +106,4 @@ jobs:
           files: |
             bin/*
             bin/hiveos/*.tar.gz
+            hive-os/spectre-miner-HiveOs.json
