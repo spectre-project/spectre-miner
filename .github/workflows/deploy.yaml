@@ -35,8 +35,8 @@ jobs:
           cargo build --target=x86_64-unknown-linux-gnu --release
           gnu_archive="bin/spectre-miner-${{ github.event.release.tag_name }}-linux-gnu-amd64.zip"
           gnu_asset_name="spectre-miner-${{ github.event.release.tag_name }}-linux-gnu-amd64"
-          hiveos_asset_name="spectre-miner-${{ github.event.release.tag_name }}-linux-gnu-amd64-hiveos"
-          hiveos_archive="bin/hiveos-${{ github.event.release.tag_name }}-linux-gnu-amd64-hiveos.tar.xf"
+          hiveos_asset_name="spectre-miner-${{ github.event.release.tag_name }}_linux_gnu_amd64_hiveos"
+          hiveos_archive="bin/hiveos/${hiveos_asset_name}.tar.gz"
           strip ./target/x86_64-unknown-linux-gnu/release/spectre-miner
           cp ./target/x86_64-unknown-linux-gnu/release/spectre-miner ./bin/${gnu_asset_name}
           zip -r "${gnu_archive}" ./bin/${gnu_asset_name}
@@ -46,12 +46,13 @@ jobs:
           cp hive-os/h-manifest.conf ./bin/hiveos/spectre-miner/
           cp hive-os/h-run.sh ./bin/hiveos/spectre-miner/
           cp hive-os/h-stats.sh ./bin/hiveos/spectre-miner/
-          tar -czvf ./bin/hiveos/${hiveos_asset_name}.tar.gz -C ./bin/hiveos spectre-miner
-          rm ./bin/${gnu_asset_name}
-          rm ./bin/hiveos/spectre-miner/h-config.sh
-          rm ./bin/hiveos/spectre-miner/h-manifest.conf
-          rm ./bin/hiveos/spectre-miner/h-run.sh
-          rm ./bin/hiveos/spectre-miner/h-stats.sh
+          tar -czvf "${hiveos_archive}" -C ./bin/hiveos spectre-miner
+          rm ./bin/${gnu_asset_name} \
+            ./bin/${hiveos_asset_name} \
+            ./bin/hiveos/spectre-miner/h-config.sh \
+            ./bin/hiveos/spectre-miner/h-manifest.conf \
+            ./bin/hiveos/spectre-miner/h-run.sh \
+            ./bin/hiveos/spectre-miner/h-stats.sh
 
       - name: Build on Linux musl
         if: ${{ matrix.os == 'ubuntu-latest' }}
