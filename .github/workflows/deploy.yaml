@@ -47,8 +47,9 @@ jobs:
           cp hive-os/h-run.sh ./bin/hiveos/spectre-miner/
           cp hive-os/h-stats.sh ./bin/hiveos/spectre-miner/
           tar -czvf "${hiveos_archive}" -C ./bin/hiveos spectre-miner
+
           rm ./bin/${gnu_asset_name} \
-            ./bin/${hiveos_asset_name} \
+            ./bin/hiveos/spectre-miner/spectre-miner \
             ./bin/hiveos/spectre-miner/h-config.sh \
             ./bin/hiveos/spectre-miner/h-manifest.conf \
             ./bin/hiveos/spectre-miner/h-run.sh \
@@ -104,5 +105,4 @@ jobs:
         with:
           files: |
             bin/*
-            bin/hiveos/*
-
+            bin/hiveos/*.tar.gz
