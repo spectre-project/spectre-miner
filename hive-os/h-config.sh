@@ -26,4 +26,5 @@ echo "$conf"
 echo "$conf" > "$CUSTOM_CONFIG_FILENAME"
 
 echo "Wrote config to $CUSTOM_CONFIG_FILENAME"
-echo "The contents of the config file are: $(<$CUSTOM_CONFIG_FILENAME)"
+echo "The contents of the config file are:"
+cat "$CUSTOM_CONFIG_FILENAME"

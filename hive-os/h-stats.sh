@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 source /hive/miners/custom/spectre-miner/h-manifest.conf
 
-log=$(cat /var/log/miner/custom/custom.log)
+# Reading log file content
+log_file="/var/log/miner/custom/custom.log"
+
+# Read the log file content
+log=$(<"$log_file")
 
 get_cpu_temps () {
   local t_core=$(cpu-temp)
@@ -32,14 +36,19 @@ get_uptime(){
 
 uptime=$(get_uptime)
 
-total_khs=$(echo $log | grep -oP "hashrate is: \K\d+.\d+" | tail -n1)
-ac=$(echo "$log" | grep -o "Block submitted successfully!" | wc -l)
+# Extract the most recent total khs value from the log
+total_khs=$(echo "$log" | grep -oP "hashrate is: \K\d+.\d+" | tail -n1)
+
+# Count the number of blocks submitted successfully
+ac=$(echo $log | grep -coP "Block submitted successfully!")
+
 rj=0
 ver=$CUSTOM_VERSION
 algo="astrobwt"
 cpu_temp=$(/hive/sbin/cpu-temp)
 hs_units="hs"
 
+# Construct JSON stats
 stats=$(jq -nc \
         --arg total_khs "$total_khs" \
         --arg khs "$total_khs" \
@@ -53,6 +62,6 @@ stats=$(jq -nc \
         --arg algo "$algo" \
         '{$total_khs, $khs, $hs_units, $hs, $temp, $uptime, $ver, ar: [$ac, $rj], $algo }')
 
-echo khs:   $hs
-echo stats: $stats
-echo ----------
+echo "khs:   $hs"
+echo "stats: $stats"
+echo "----------"

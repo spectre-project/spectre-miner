@@ -1,19 +1,25 @@
 #!/usr/bin/env bash
 
+# Source the configuration file
 source h-manifest.conf
 
-CUSTOM_LOG_BASEDIR=$(dirname "$CUSTOM_LOG_BASENAME")
-[[ ! -d $CUSTOM_LOG_BASEDIR ]] && mkdir -p $CUSTOM_LOG_BASEDIR
+# Define the custom log directory
+LOG_DIR=$(dirname "$CUSTOM_LOG_BASENAME")
+mkdir -p "$LOG_DIR"
 
-if [[ -z $CUSTOM_CONFIG_FILENAME ]]; then
-    echo -e "The config file is not defined"
+# Check if the custom config filename is defined
+if [[ -z ${CUSTOM_CONFIG_FILENAME:-} ]]; then
+    echo "The config file is not defined"
     exit 1
 fi
 
+# Set the library path
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/hive/lib
 
+# Read the custom user configuration
 CUSTOM_USER_CONFIG=$(< "$CUSTOM_CONFIG_FILENAME")
 
+# Display the arguments
 echo "args: $CUSTOM_USER_CONFIG"
 
 MINER=spectre-miner
