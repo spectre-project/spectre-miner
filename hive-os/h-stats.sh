@@ -23,17 +23,17 @@ get_cpu_fans () {
   echo $l_fan | tr " " "\n" | jq -cs '.'
 }
 
-get_uptime() {
-  local start_time=$(head /var/log/miner/custom/custom.log -n1 | cut -c 2-21)
-  local start_seconds=$(date -d"$start_time" +%s)
-  local current_seconds=$(date +%s)
-  echo $((current_seconds - start_seconds))
+get_uptime(){
+    local start_time=$(cat "/tmp/miner_start_time")
+    local current_time=$(date +%s)
+    let uptime=current_time-start_time
+    echo $uptime
 }
 
 uptime=$(get_uptime)
 
 total_khs=$(echo $log | grep -oP "hashrate is: \K\d+.\d+" | tail -n1)
-ac=$(echo $log | grep -coP "Block submitted successfully!")
+ac=$(echo "$log" | grep -o "Block submitted successfully!" | wc -l)
 rj=0
 ver=$CUSTOM_VERSION
 algo="astrobwt"
