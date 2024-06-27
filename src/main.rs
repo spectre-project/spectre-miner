@@ -111,28 +111,40 @@ async fn main() -> Result<(), Error> {
     let _shutdown_when_dropped = shutdown.arm();
 
     while !shutdown.is_shutdown() {
-        let mut client = SpectredHandler::connect(
+        match SpectredHandler::connect(
             opt.spectred_address.clone(),
             opt.mining_address.clone(),
             opt.mine_when_not_synced,
         )
-        .await?;
-        if let Some(devfund_address) = &opt.devfund_address {
-            client.add_devfund(devfund_address.clone(), opt.devfund_percent);
-            info!(
-                "devfund enabled, mining {}.{}% of the time to devfund address: {} ",
-                opt.devfund_percent / 100,
-                opt.devfund_percent % 100,
-                devfund_address
-            );
+        .await
+        {
+            Ok(mut client) => {
+                let mut miner_manager =
+                    MinerManager::new(client.send_channel.clone(), opt.num_threads, throttle, shutdown.clone());
+                if let Some(devfund_address) = &opt.devfund_address {
+                    client.add_devfund(devfund_address.clone(), opt.devfund_percent);
+                    info!(
+                        "devfund enabled, mining {}.{}% of the time to devfund address: {} ",
+                        opt.devfund_percent / 100,
+                        opt.devfund_percent % 100,
+                        devfund_address
+                    );
+                }
+                if let Err(e) = client.client_send(NotifyNewBlockTemplateRequestMessage {}).await {
+                    warn!("Error sending block template request: {}", e);
+                }
+                if let Err(e) = client.client_get_block_template().await {
+                    warn!("Error getting block template: {}", e);
+                }
+                if let Err(e) = client.listen(&mut miner_manager, shutdown.clone()).await {
+                    warn!("Disconnected from spectred: {}. Retrying", e);
+                }
+            }
+            Err(e) => {
+                warn!("Failed to connect to spectred: {}. Retrying in 10 seconds...", e);
+            }
         }
-        client.client_send(NotifyNewBlockTemplateRequestMessage {}).await?;
-        client.client_get_block_template().await?;
-
-        let mut miner_manager =
-            MinerManager::new(client.send_channel.clone(), opt.num_threads, throttle, shutdown.clone());
-        client.listen(&mut miner_manager, shutdown.clone()).await?;
-        warn!("Disconnected from spectred, retrying");
+        tokio::time::sleep(Duration::from_secs(10)).await;
     }
     Ok(())
 }
