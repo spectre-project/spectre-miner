@@ -2,7 +2,7 @@
 
 use chrono::Local;
 use clap::Parser;
-use log::{error, info, warn};
+use log::{info, warn};
 use std::error::Error as StdError;
 use std::{
     io::Write,
@@ -12,7 +12,6 @@ use std::{
     },
     time::Duration,
 };
-use tokio::sync::mpsc;
 
 // Add sysinfo crate for system information
 use sysinfo::System;
@@ -111,9 +110,6 @@ async fn main() -> Result<(), Error> {
     let shutdown = ShutdownHandler(Arc::new(AtomicBool::new(false)));
     let _shutdown_when_dropped = shutdown.arm();
 
-    let (send_channel, _) = mpsc::channel(100);
-    let mut miner_manager = MinerManager::new(send_channel.clone(), opt.num_threads, throttle, shutdown.clone());
-
     while !shutdown.is_shutdown() {
         match SpectredHandler::connect(
             opt.spectred_address.clone(),
@@ -123,6 +119,8 @@ async fn main() -> Result<(), Error> {
         .await
         {
             Ok(mut client) => {
+                let mut miner_manager =
+                    MinerManager::new(client.send_channel.clone(), opt.num_threads, throttle, shutdown.clone());
                 if let Some(devfund_address) = &opt.devfund_address {
                     client.add_devfund(devfund_address.clone(), opt.devfund_percent);
                     info!(
@@ -133,25 +131,17 @@ async fn main() -> Result<(), Error> {
                     );
                 }
                 if let Err(e) = client.client_send(NotifyNewBlockTemplateRequestMessage {}).await {
-                    error!("Error sending block template request: {}", e);
+                    warn!("Error sending block template request: {}", e);
                 }
                 if let Err(e) = client.client_get_block_template().await {
-                    error!("Error getting block template: {}", e);
+                    warn!("Error getting block template: {}", e);
                 }
-
-                miner_manager.resume();
-
                 if let Err(e) = client.listen(&mut miner_manager, shutdown.clone()).await {
-                    warn!("Connection error: {}. Reconnecting in 10 seconds...", e);
-                    miner_manager.pause();
-                } else {
-                    warn!("Disconnected from spectred. Reconnecting in 10 seconds...");
-                    miner_manager.pause();
+                    warn!("Disconnected from spectred: {}. Retrying", e);
                 }
             }
             Err(e) => {
                 warn!("Failed to connect to spectred: {}. Retrying in 10 seconds...", e);
-                miner_manager.pause();
             }
         }
         tokio::time::sleep(Duration::from_secs(10)).await;
