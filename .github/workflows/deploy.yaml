@@ -10,7 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-20.04, ubuntu-latest, windows-latest, macos-latest]
-    name: Building, ${{ matrix.os }}
+    name: Building on ${{ matrix.os }}
     steps:
 
       - name: Checkout sources
@@ -32,8 +32,6 @@ jobs:
 
       - name: Build on Linux GNU
         if: matrix.os == 'ubuntu-20.04'
-
-        # We're using musl to make the binaries statically linked and portable.
         run: |
           cargo build --target=x86_64-unknown-linux-gnu --release
           archive="bin/spectre-miner-${{ github.event.release.tag_name }}-linux-gnu-amd64.zip"
@@ -41,12 +39,21 @@ jobs:
           strip ./target/x86_64-unknown-linux-gnu/release/spectre-miner
           mv ./target/x86_64-unknown-linux-gnu/release/spectre-miner ./bin/${asset_name}
           zip -r "${archive}" ./bin/${asset_name}
+
+          # HiveOS.
+          hiveos_asset_name="spectre-miner-${{ github.event.release.tag_name }}_hiveos"
+          hiveos_archive="bin/${hiveos_asset_name}.tar.gz"
+          cp -r ./hive-os ./bin/spectre-miner
+          cp ./bin/${asset_name} ./bin/spectre-miner/spectre-miner
+          sed 's/^ver="custom"/ver="${{ github.event.release.tag_name }}"/g' -i ./bin/spectre-miner/h-stats.sh
+          tar -czvf "${hiveos_archive}" -C ./bin spectre-miner
+
+          # Cleanup.
           rm ./bin/${asset_name}
+          rm -R ./bin/spectre-miner
 
       - name: Build on Linux musl
         if: matrix.os == 'ubuntu-latest'
-
-        # We're using musl to make the binaries statically linked and portable.
         run: |
           sudo apt-get install -y musl-tools
           rustup target add x86_64-unknown-linux-musl
@@ -61,8 +68,6 @@ jobs:
       - name: Build on Windows
         if: matrix.os == 'windows-latest'
         shell: bash
-
-        # We're using 'bin/' instead of './bin/' as otherwise 7z won't add the directory.
         run: |
           cargo build --target=x86_64-pc-windows-msvc --release
           archive="bin/spectre-miner-${{ github.event.release.tag_name }}-win64-amd64.zip"
@@ -96,4 +101,5 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            bin/*
+            bin/*.zip
+            bin/*.tar.gz

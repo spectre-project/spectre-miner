@@ -72,10 +72,10 @@ async fn main() -> Result<(), Error> {
 
     // Display system information
     println!("=> System Information:");
-    println!("System name:             {}", System::name().unwrap_or_else(|| "Unknown".to_string()));
-    println!("System kernel version:   {}", System::kernel_version().unwrap_or_else(|| "Unknown".to_string()));
-    println!("System OS version:       {}", System::os_version().unwrap_or_else(|| "Unknown".to_string()));
-    println!("System host name:        {}", System::host_name().unwrap_or_else(|| "Unknown".to_string()));
+    println!("System name:             {}", System::name().unwrap_or("Unknown".to_string()));
+    println!("System kernel version:   {}", System::kernel_version().unwrap_or("Unknown".to_string()));
+    println!("System OS version:       {}", System::os_version().unwrap_or("Unknown".to_string()));
+    println!("System host name:        {}", System::host_name().unwrap_or("Unknown".to_string()));
 
     // Display CPU brand and frequency information only if there is a change
     let mut last_cpu_brand = String::new();
