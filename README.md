@@ -79,6 +79,12 @@ To start mining you just need to run the following:
 
 This will run the miner on all the available CPU cores.
 
+## Hive OS
+
+You can always download the most recent HiveOS flight sheet at our
+[downloads](https://spectre-network.org/downloads/hive-os/) folder
+on our website.
+
 ## Development Fund
 
 **NOTE: This feature is off by default**
