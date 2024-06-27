@@ -30,32 +30,27 @@ jobs:
       - name: Create bin directory
         run: mkdir bin
 
-      - name: Build on Linux GNU and HiveOS
+      - name: Build on Linux GNU
         if: matrix.os == 'ubuntu-20.04'
         run: |
           cargo build --target=x86_64-unknown-linux-gnu --release
-          gnu_archive="bin/spectre-miner-${{ github.event.release.tag_name }}-linux-gnu-amd64.zip"
-          gnu_asset_name="spectre-miner-${{ github.event.release.tag_name }}-linux-gnu-amd64"
-          hiveos_asset_name="spectre-miner-${{ github.event.release.tag_name }}_linux_gnu_amd64_hiveos"
-          hiveos_archive="bin/hiveos/${hiveos_asset_name}.tar.gz"
+          archive="bin/spectre-miner-${{ github.event.release.tag_name }}-linux-gnu-amd64.zip"
+          asset_name="spectre-miner-${{ github.event.release.tag_name }}-linux-gnu-amd64"
           strip ./target/x86_64-unknown-linux-gnu/release/spectre-miner
-          cp ./target/x86_64-unknown-linux-gnu/release/spectre-miner ./bin/${gnu_asset_name}
-          zip -r "${gnu_archive}" ./bin/${gnu_asset_name}
-          mkdir -p ./bin/hiveos/spectre-miner
-          cp ./target/x86_64-unknown-linux-gnu/release/spectre-miner ./bin/hiveos/spectre-miner/spectre-miner
-          cp hive-os/h-config.sh ./bin/hiveos/spectre-miner/
-          cp hive-os/h-manifest.conf ./bin/hiveos/spectre-miner/
-          cp hive-os/h-run.sh ./bin/hiveos/spectre-miner/
-          cp hive-os/h-stats.sh ./bin/hiveos/spectre-miner/
-          chmod +x ./bin/hiveos/spectre-miner/h-run.sh
-          tar -czvf "${hiveos_archive}" -C ./bin/hiveos spectre-miner
+          mv ./target/x86_64-unknown-linux-gnu/release/spectre-miner ./bin/${asset_name}
+          zip -r "${archive}" ./bin/${asset_name}
 
-          rm ./bin/${gnu_asset_name} \
-            ./bin/hiveos/spectre-miner/spectre-miner \
-            ./bin/hiveos/spectre-miner/h-config.sh \
-            ./bin/hiveos/spectre-miner/h-manifest.conf \
-            ./bin/hiveos/spectre-miner/h-run.sh \
-            ./bin/hiveos/spectre-miner/h-stats.sh
+          # HiveOS.
+          hiveos_asset_name="spectre-miner-${{ github.event.release.tag_name }}_hiveos"
+          hiveos_archive="bin/${hiveos_asset_name}.tar.gz"
+          cp -r ./hive-os ./bin/spectre-miner
+          cp ./bin/${asset_name} ./bin/spectre-miner/spectre-miner
+          sed 's/^ver="custom"/ver="${{ github.event.release.tag_name }}"/g' -i ./bin/spectre-miner/h-stats.sh
+          tar -czvf "${hiveos_archive}" -C ./bin spectre-miner
+
+          # Cleanup.
+          rm ./bin/${asset_name}
+          rm -R ./bin/spectre-miner
 
       - name: Build on Linux musl
         if: matrix.os == 'ubuntu-latest'
@@ -106,6 +101,5 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            bin/*
-            bin/hiveos/*.tar.gz
-            hive-os/spectre-miner-HiveOs.json
+            bin/*.zip
+            bin/*.tar.gz

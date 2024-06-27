@@ -43,8 +43,8 @@ total_khs=$(grep -oP "hashrate is: \K\d+.\d+" <<< "$log" | tail -n1)
 ac=$(grep -coP "Block submitted successfully!" <<< "$log")
 
 rj=0
-ver=$CUSTOM_VERSION
-algo="astrobwt"
+ver="custom"
+algo="spectrex"
 cpu_temp=$(/hive/sbin/cpu-temp)
 hs_units="hs"
 
