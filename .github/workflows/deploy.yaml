@@ -44,6 +44,7 @@ jobs:
           hiveos_asset_name="spectre-miner-${{ github.event.release.tag_name }}_hiveos"
           hiveos_archive="bin/${hiveos_asset_name}.tar.gz"
           cp -r ./hive-os ./bin/spectre-miner
+          chmod +x ./bin/spectre-miner/h-run.sh
           cp ./bin/${asset_name} ./bin/spectre-miner/spectre-miner
           sed 's/^ver="custom"/ver="${{ github.event.release.tag_name }}"/g' -i ./bin/spectre-miner/h-stats.sh
           tar -czvf "${hiveos_archive}" -C ./bin spectre-miner
