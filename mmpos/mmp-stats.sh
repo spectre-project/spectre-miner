@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 GPU_COUNT=$1
 LOG_FILE=$2
-cd "$(dirname "$0")"
+cd `dirname $0`
 [ -r mmp-external.conf ] && . mmp-external.conf
 
 get_cpu_hashes() {
