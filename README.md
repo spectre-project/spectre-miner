@@ -79,11 +79,12 @@ To start mining you just need to run the following:
 
 This will run the miner on all the available CPU cores.
 
-## Hive OS
+## Hive OS and mmpOS
 
-You can always download the most recent HiveOS flight sheet at our
-[downloads](https://spectre-network.org/downloads/hive-os/) folder
-on our website.
+You can always download the most recent HiveOS flight sheet and mmpOS miner profile from our website.
+
+- [HiveOS Flight Sheet](https://spectre-network.org/downloads/hive-os/)
+- [mmpOS Miner Profile](https://spectre-network.org/downloads/mmp-os/)
 
 ## Development Fund
 
