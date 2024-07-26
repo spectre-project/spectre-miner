@@ -38,9 +38,15 @@ uptime=$(get_uptime)
 
 # Extract the most recent total khs value from the log
 total_khs=$(grep -oP "hashrate is: \K\d+.\d+" <<< "$log" | tail -n1)
+if [[ -z $total_khs ]]; then
+  total_khs=0
+fi
 
 # Count the number of blocks submitted successfully
 ac=$(grep -coP "Block submitted successfully!" <<< "$log")
+if [[ -z $ac ]]; then
+  ac=0
+fi
 
 rj=0
 ver="custom"
