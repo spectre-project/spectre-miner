@@ -43,7 +43,7 @@ jobs:
           # HiveOS.
           hiveos_asset_name="spectre-miner-${{ github.event.release.tag_name }}_hiveos"
           hiveos_archive="bin/${hiveos_asset_name}.tar.gz"
-          cp -r ./hive-os ./bin/spectre-miner
+          cp -r ./integrations/hive-os ./bin/spectre-miner
           cp ./bin/${asset_name} ./bin/spectre-miner/spectre-miner
           sed 's/^ver="custom"/ver="${{ github.event.release.tag_name }}"/g' -i ./bin/spectre-miner/h-stats.sh
           tar -czvf "${hiveos_archive}" -C ./bin spectre-miner
@@ -52,7 +52,7 @@ jobs:
           # mmpOS.
           mmpos_asset_name="spectre-miner-${{ github.event.release.tag_name }}_mmpos"
           mmpos_archive="bin/${mmpos_asset_name}.tar.gz"
-          cp -r ./mmpos ./bin/spectre-miner
+          cp -r ./integrations/mmpos ./bin/spectre-miner
           cp ./bin/${asset_name} ./bin/spectre-miner/spectre-miner
           sed 's/^ver="custom"/ver="${{ github.event.release.tag_name }}"/g' -i ./bin/spectre-miner/mmp-external.conf
           tar -czvf "${mmpos_archive}" -C ./bin spectre-miner
